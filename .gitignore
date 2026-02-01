@@ -1,0 +1,10 @@
+.env
+__pycache__/
+*.pyc
+*.xlsx
+# 출력/캐시 (용량 절감)
+xlsx/
+.venv/
+venv/
+*.log
+.cache/
