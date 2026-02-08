@@ -101,6 +101,31 @@ def _enrich_with_similar_news(df: pd.DataFrame, all_news: list) -> pd.DataFrame:
     return out
 
 
+def _load_existing_data() -> list:
+    """기존 data.js에서 JSON 데이터 로드."""
+    try:
+        # 프로젝트 루트 기준 data.js
+        root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        data_path = os.path.join(root_dir, "data.js")
+        
+        if not os.path.exists(data_path):
+            return []
+            
+        with open(data_path, "r", encoding="utf-8") as f:
+            content = f.read()
+            
+        # JS 변수 선언(const keywordData = ) 제거하고 JSON 파싱
+        # 예: const keywordData = [...];
+        match = re.search(r"const\s+keywordData\s*=\s*(\[.*\]);", content, re.DOTALL)
+        if match:
+            json_str = match.group(1)
+            return json.loads(json_str)
+        return []
+    except Exception as e:
+        print(f"[경고] 기존 데이터 로드 실패: {e}")
+        return []
+
+
 def main() -> None:
     """유튜브·구글·네이버 수집 → 어그로 점수 → 엑셀 1개 파일."""
     all_items = []
@@ -201,25 +226,80 @@ def main() -> None:
 
     # 6. 엑셀 출력 & 웹용 JS 출력
     # (카테고리별로 모은 전체 데이터를 점수순 정렬)
-    df = pd.DataFrame(all_items)
-    if not df.empty:
-        df["추천점수"] = pd.to_numeric(df["score"], errors="coerce").fillna(0)
-        df = df.sort_values(by="추천점수", ascending=False)
-
-        # 상위 100개 + 비슷한 뉴스 보강 (개수 늘림)
-        df_top = df.head(100).copy()
-        df_top = _enrich_with_similar_news(df_top, all_items)
-
-        # 엑셀 저장 로직 삭제됨
-        # path = export_to_excel(df_top)
-        # print(f"\n엑셀 파일 생성 완료: {path}")
-
-        json_path = export_to_js(df_top, scraper_status=scraper_status)
-        print(f"웹 데이터 파일 생성 완료: {json_path}")
+    
+    # [수정] 기존 데이터 병합 로직
+    # 1. 기존 데이터 로드
+    existing_data = _load_existing_data()
+    
+    # 2. 현재 수집한 카테고리의 기존 데이터 삭제 (업데이트)
+    # 카테고리가 없는 데이터는 '정치'로 간주하거나 유지? -> 일단 유지
+    final_items = [item for item in existing_data if item.get("카테고리") != selected_category]
+    
+    # 3. 새 데이터 추가
+    # 새 데이터도 포맷팅 필요 (all_items는 딕셔너리 리스트)
+    # _to_row 시점에서 이미 카테고리는 들어있음.
+    
+    # 점수 정렬 및 보강은 '이번에 수집한 데이터'에 대해서만? 아니면 전체?
+    # -> 보강(_enrich)은 이번 수집 데이터에 대해서만 수행하고, 합치는 게 효율적.
+    
+    df_new = pd.DataFrame(all_items)
+    if not df_new.empty:
+        df_new["추천점수"] = pd.to_numeric(df_new["score"], errors="coerce").fillna(0)
+        df_new = df_new.sort_values(by="추천점수", ascending=False)
         
-        print(f"총 {len(df_top)}건 (전체 카테고리 통합)")
+        # 상위 100개 + 비슷한 뉴스 보강
+        df_new = df_new.head(100).copy()
+        df_new = _enrich_with_similar_news(df_new, all_items)
+        
+        # DataFrame -> Dict List 변환
+        # export_to_js 내부에서 컬럼 매핑 등을 수행하므로, 여기서는 그냥 합쳐서 넘기는 게 복잡함.
+        # export_to_js가 DataFrame을 받으니, 기존 데이터도 DF로 변환해서 합치는 게 낫다.
+        
+        # 기존 데이터 DF 변환
+        if existing_data:
+             df_old = pd.DataFrame(existing_data)
+        else:
+             df_old = pd.DataFrame()
+
+        # 병합: (Existing - CurrentCat) + New
+        # existing_data는 이미 필터링 됨 (final_items)
+        df_final = pd.DataFrame(final_items)
+        
+        # 컬럼 매핑 주의: existing_data는 이미 한글 컬럼명("제목", "추천점수" 등)
+        # df_new는 영문 컬럼명("title", "score" 등) 혼재 가능성 -> _ensure_columns가 처리함.
+        # 하지만 df_new는 _enrich_with_similar_news 거치면서 일부 한글 컬럼("뉴스기사2_URL" 등) 생성됨.
+        # 가장 깔끔한 방법: df_new를 export_to_js 로직과 유사하게 정규화한 뒤 합치기.
+        
+        # 편의상: df_new를 export_to_js에 넘기되, 'append_mode'를 지원하거나
+        # 여기서 다 합쳐서 넘기거나.
+        # export_to_js는 '순위'를 재매김. 카테고리별 순위? 아니면 전체 순위?
+        # 웹 UI는 카테고리별로 필터링해서 보여주므로, 전체 리스트에 순위는 의미가 적음(보여줄 때 다시 매김).
+        # 다만 export_to_js가 순위를 매겨버림.
+        
+        # 결론: df_new와 df_final(기존)을 합쳐서 df_merged를 만들고 export_to_js 호출.
+        # 단, df_final의 컬럼 이름은 "제목", "카테고리" 등 한글.
+        # df_new의 컬럼 이름은 "title", "category" 등 영문.
+        # -> pd.concat 시 컬럼 불일치 발생.
+        
+        # 해결: df_new의 컬럼명을 한글로 매핑한 뒤 병합.
+        from excel_reporter import _ensure_columns
+        df_new_mapped = _ensure_columns(df_new)
+        # _ensure_columns는 OUTPUT_COLUMNS_BASE(한글)만 남김.
+        # 단, '카테고리'가 _ensure_columns 로직에 추가되어 있어야 함. (앞 단계에서 추가했음)
+        
+        # df_final(기존)은 이미 한글 컬럼.
+        # 두 DF 병합
+        df_merged = pd.concat([df_final, df_new_mapped], ignore_index=True)
+        
+        json_path = export_to_js(df_merged, scraper_status=scraper_status)
+        print(f"웹 데이터 파일 업데이트 완료: {json_path}")
+        print(f"총 {len(df_merged)}건 (누적)")
+
     else:
-        print("수집된 데이터가 없습니다.")
+        print("이번 실행에서 수집된 데이터가 없습니다. 기존 데이터 유지.")
+        # 수집 실패해도 기존 데이터는 유지하고 status만 업데이트 필요할 수 있음.
+        # 여기서는 간단히 패스.
+
 
     # 7. 깃허브 자동 푸시
     git_push()
