@@ -131,9 +131,10 @@
             const period = 'today';  // 고정값: 오늘
 
             const filteredData = useMemo(() => {
-                if (!window.keywordData) return [];
+                const rawData = window.keywordData || (typeof keywordData !== 'undefined' ? keywordData : []);
+                if (!rawData || rawData.length === 0) return [];
 
-                return window.keywordData
+                return rawData
                     .filter(item => item.카테고리 === category)
                     .filter(item => isWithinPeriod(item.업로드일, period))
                     .sort((a, b) => b.추천점수 - a.추천점수);

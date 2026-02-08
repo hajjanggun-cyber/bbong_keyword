@@ -357,8 +357,8 @@ def export_to_js(
         
         status_str = json.dumps(scraper_status or {}, ensure_ascii=False, indent=2)
         
-        js_content = f"const keywordData = {json_str};\n"
-        js_content += f"const scraperStatus = {status_str};\n"
+        js_content = f"var keywordData = {json_str};\n"
+        js_content += f"var scraperStatus = {status_str};\n"
 
         # 루트 디렉토리에 저장
         root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
