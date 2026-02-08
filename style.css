@@ -1,266 +1,443 @@
-:root {
-    --bg-color: #ffffff;
-    --text-primary: #000000;
-    --border-color: #d0d7e5;
-    --header-bg: #f3f3f3;
-    --header-text: #333333;
-    --row-hover: #e8f0fe;
-    --link-color: #0563c1;
-    --rank-color: #e02d1b;
-}
-
+/* ===== 전역 설정 ===== */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Malgun Gothic', 'Noto Sans KR', sans-serif;
-    font-size: 13px;
+}
+
+:root {
+    --bg-dark: #0a0e27;
+    --bg-card: rgba(255, 255, 255, 0.05);
+    --text-primary: #ffffff;
+    --text-secondary: #a0aec0;
+    --accent-purple: #9333ea;
+    --accent-blue: #3b82f6;
+    --accent-pink: #ec4899;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --shadow-glow: 0 0 30px rgba(147, 51, 234, 0.3);
 }
 
 body {
-    background-color: var(--bg-color);
+    font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
+    background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #2d1b4e 100%);
     color: var(--text-primary);
-    padding: 20px;
+    min-height: 100vh;
+    overflow-x: hidden;
 }
 
-.table-container {
-    overflow-x: auto;
-    border: 1px solid #777;
-    /* Outer border like Excel window */
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: #fff;
-    min-width: 1000px;
-}
-
-th,
-td {
-    padding: 4px 8px;
-    border: 1px solid var(--border-color);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    height: 24px;
-    /* Excel default row height approx */
-}
-
-th {
-    background-color: var(--header-bg);
-    color: var(--header-text);
-    font-weight: normal;
-    text-align: center;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    border-bottom: 2px solid #b5b5b5;
-    /* Slightly thicker header bottom */
-}
-
-/* Rank Column - Centered */
-td.rank {
-    text-align: center;
-    background-color: #f3f3f3;
-    /* Excel row header style */
-    width: 40px;
-    font-weight: bold;
-}
-
-/* Title Column */
-td.title {
-    max-width: 400px;
-}
-
-/* Score Column - Right aligned or Center */
-td.score {
-    text-align: center;
-    width: 60px;
-}
-
-/* Keywords Column */
-td.keywords {
-    max-width: 150px;
-    color: #555;
-    text-align: center;
-}
-
-/* Source Column */
-td.source {
-    text-align: center;
-    width: 80px;
-}
-
-td.source span {
-    font-weight: bold;
-}
-
-.source-youtube {
-    color: #ff0000;
-}
-
-.source-news {
-    color: #1a0dab;
-}
-
-/* Links Column */
-td.links {
-    text-align: left;
-    max-width: 300px;
-}
-
-a {
-    color: var(--link-color);
-    text-decoration: none;
-}
-
-a:hover {
-    text-decoration: underline;
-}
-
-/* Date Column */
-td.date {
-    text-align: center;
-    width: 100px;
-    color: #333;
-}
-
-/* Row Hover Effect */
-tr:hover td {
-    background-color: var(--row-hover);
-    cursor: default;
-}
-
-/* Scrollbar to look more native/clean */
-::-webkit-scrollbar {
-    width: 12px;
-    height: 12px;
-}
-
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border: 3px solid #f1f1f1;
-    border-radius: 6px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
-}
-
-/* Landing Overlay */
-#landing-overlay {
+/* 배경 애니메이션 */
+body::before {
+    content: '';
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+    background:
+        radial-gradient(circle at 20% 50%, rgba(147, 51, 234, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(236, 72, 153, 0.15) 0%, transparent 50%);
+    animation: bgPulse 15s ease-in-out infinite;
+    pointer-events: none;
+    z-index: -1;
 }
 
-.landing-content {
-    text-align: center;
-    background: white;
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+@keyframes bgPulse {
+
+    0%,
+    100% {
+        opacity: 0.5;
+    }
+
+    50% {
+        opacity: 0.8;
+    }
 }
 
-.landing-content h1 {
-    font-size: 28px;
-    margin-bottom: 40px;
-    color: #333;
-    font-weight: 800;
+/* ===== 앱 컨테이너 ===== */
+.app {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
 }
 
-.selection-group {
+/* ===== 헤더 ===== */
+.app-header {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 30px 40px;
     margin-bottom: 30px;
-    text-align: left;
+    box-shadow: var(--shadow-glow);
+    animation: fadeInDown 0.6s ease-out;
 }
 
-.selection-group h3 {
-    font-size: 16px;
-    color: #666;
-    margin-bottom: 10px;
-    font-weight: 600;
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
 }
 
-.button-group {
+.logo-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.logo-icon {
+    font-size: 3rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.app-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #9333ea 0%, #3b82f6 50%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 5px;
+}
+
+.app-subtitle {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.stats-badge {
+    background: linear-gradient(135deg, #9333ea 0%, #ec4899 100%);
+    padding: 15px 30px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 10px 30px rgba(147, 51, 234, 0.4);
+}
+
+.stats-number {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.stats-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* ===== 필터 패널 ===== */
+.filter-panel {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 30px;
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+.filter-section {
+    flex: 1;
+    min-width: 250px;
+}
+
+.filter-title {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    color: var(--text-primary);
+}
+
+.filter-buttons {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
-    justify-content: center;
 }
 
-.select-btn {
-    padding: 10px 20px;
-    font-size: 15px;
-    border: 1px solid #ddd;
-    background-color: #fff;
-    border-radius: 20px;
+.filter-btn {
+    padding: 12px 24px;
+    border: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-secondary);
+    border-radius: 12px;
     cursor: pointer;
-    transition: all 0.2s;
-    color: #555;
-}
-
-.select-btn:hover {
-    background-color: #f0f0f0;
-    border-color: #ccc;
-}
-
-.select-btn.active {
-    background-color: #007bff;
-    color: white;
-    border-color: #007bff;
-    font-weight: bold;
-    box-shadow: 0 4px 6px rgba(0, 123, 255, 0.2);
-}
-
-.action-group {
-    margin-top: 40px;
-    border-top: 1px solid #eee;
-    padding-top: 30px;
-}
-
-.action-group h3 {
-    font-size: 16px;
-    color: #666;
-    margin-bottom: 15px;
+    font-size: 0.95rem;
     font-weight: 600;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
 }
 
-#search-btn {
-    padding: 15px 50px;
-    font-size: 18px;
-    background-color: #28a745;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-weight: bold;
-    box-shadow: 0 4px 6px rgba(40, 167, 69, 0.2);
-}
-
-#search-btn:hover {
-    background-color: #218838;
+.filter-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--accent-purple);
     transform: translateY(-2px);
-    box-shadow: 0 6px 8px rgba(40, 167, 69, 0.3);
 }
 
-#search-btn:active {
-    transform: translateY(0);
+.filter-btn.active {
+    background: linear-gradient(135deg, #9333ea 0%, #3b82f6 100%);
+    border-color: transparent;
+    color: white;
+    box-shadow: 0 5px 20px rgba(147, 51, 234, 0.4);
 }
 
-/* Hide Enter Button styles as it is replaced */
-#enter-btn {
-    display: none;
+/* ===== 뉴스 그리드 ===== */
+.news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+/* ===== 뉴스 카드 ===== */
+.news-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 25px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: fadeInUp 0.6s ease-out both;
+    position: relative;
+    overflow: hidden;
+}
+
+.news-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(147, 51, 234, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.news-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 60px rgba(147, 51, 234, 0.3);
+    border-color: var(--accent-purple);
+}
+
+.news-card:hover::before {
+    opacity: 1;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    position: relative;
+    z-index: 1;
+}
+
+.score-badge {
+    padding: 12px 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    font-weight: 700;
+}
+
+.score-value {
+    font-size: 1.8rem;
+}
+
+.score-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.card-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+.source-badge,
+.date-badge {
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.news-title {
+    font-size: 1.15rem;
+    line-height: 1.6;
+    margin-bottom: 15px;
+    color: var(--text-primary);
+    position: relative;
+    z-index: 1;
+}
+
+.keywords {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.keyword-tag {
+    padding: 6px 12px;
+    background: linear-gradient(135deg, rgba(147, 51, 234, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%);
+    border: 1px solid rgba(147, 51, 234, 0.3);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: #a78bfa;
+}
+
+.card-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+}
+
+.action-btn {
+    flex: 1;
+    min-width: 100px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    text-decoration: none;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.action-btn.youtube {
+    background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+    color: white;
+}
+
+.action-btn.news {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+}
+
+.action-btn.related {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* ===== 빈 상태 ===== */
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 80px 20px;
+    background: var(--bg-card);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+}
+
+.empty-icon {
+    font-size: 5rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+}
+
+/* ===== 푸터 ===== */
+.app-footer {
+    text-align: center;
+    padding: 30px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* ===== 애니메이션 ===== */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== 반응형 ===== */
+@media (max-width: 768px) {
+    .app-title {
+        font-size: 1.8rem;
+    }
+
+    .logo-icon {
+        font-size: 2rem;
+    }
+
+    .news-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-panel {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .logo-section {
+        flex-direction: column;
+    }
 }
