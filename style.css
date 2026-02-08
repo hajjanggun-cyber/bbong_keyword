@@ -6,26 +6,32 @@
 }
 
 :root {
-    --bg-dark: #0a0e27;
-    --bg-card: rgba(255, 255, 255, 0.05);
-    --text-primary: #ffffff;
-    --text-secondary: #a0aec0;
-    --accent-purple: #9333ea;
+    --bg-white: #ffffff;
+    --bg-light: #f8fafc;
+    --bg-card: #ffffff;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --accent-purple: #8b5cf6;
     --accent-blue: #3b82f6;
     --accent-pink: #ec4899;
-    --border-color: rgba(255, 255, 255, 0.1);
-    --shadow-glow: 0 0 30px rgba(147, 51, 234, 0.3);
+    --border-color: #e2e8f0;
+    --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-glow: 0 0 20px rgba(139, 92, 246, 0.15);
 }
 
 body {
     font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
-    background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #2d1b4e 100%);
+    background-color: var(--bg-white);
     color: var(--text-primary);
     min-height: 100vh;
     overflow-x: hidden;
+    background-image:
+        radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.03) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.03) 0%, transparent 40%);
 }
 
-/* 배경 애니메이션 */
+/* 배경 패턴 (밝은 테마) */
 body::before {
     content: '';
     position: fixed;
@@ -34,24 +40,11 @@ body::before {
     width: 100%;
     height: 100%;
     background:
-        radial-gradient(circle at 20% 50%, rgba(147, 51, 234, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 40% 20%, rgba(236, 72, 153, 0.15) 0%, transparent 50%);
-    animation: bgPulse 15s ease-in-out infinite;
+        radial-gradient(circle at 20% 50%, rgba(147, 51, 234, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(236, 72, 153, 0.03) 0%, transparent 50%);
     pointer-events: none;
     z-index: -1;
-}
-
-@keyframes bgPulse {
-
-    0%,
-    100% {
-        opacity: 0.5;
-    }
-
-    50% {
-        opacity: 0.8;
-    }
 }
 
 /* ===== 앱 컨테이너 ===== */
@@ -63,13 +56,12 @@ body::before {
 
 /* ===== 헤더 ===== */
 .app-header {
-    background: var(--bg-card);
-    backdrop-filter: blur(20px);
+    background: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: 24px;
     padding: 30px 40px;
     margin-bottom: 30px;
-    box-shadow: var(--shadow-glow);
+    box-shadow: var(--shadow-soft);
     animation: fadeInDown 0.6s ease-out;
 }
 
@@ -126,13 +118,14 @@ body::before {
 }
 
 .stats-badge {
-    background: linear-gradient(135deg, #9333ea 0%, #ec4899 100%);
+    background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-pink) 100%);
     padding: 15px 30px;
     border-radius: 50px;
     display: flex;
     align-items: center;
     gap: 10px;
-    box-shadow: 0 10px 30px rgba(147, 51, 234, 0.4);
+    box-shadow: 0 10px 30px rgba(147, 51, 234, 0.2);
+    color: white;
 }
 
 .stats-number {
@@ -147,16 +140,16 @@ body::before {
 
 /* ===== 필터 패널 ===== */
 .filter-panel {
-    background: var(--bg-card);
-    backdrop-filter: blur(20px);
+    background: var(--bg-light);
     border: 1px solid var(--border-color);
-    border-radius: 20px;
+    border-radius: 24px;
     padding: 25px;
     margin-bottom: 30px;
     display: flex;
     gap: 40px;
     flex-wrap: wrap;
     animation: fadeInUp 0.6s ease-out 0.2s both;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
 .filter-section {
@@ -179,27 +172,28 @@ body::before {
 .filter-btn {
     padding: 12px 24px;
     border: 1px solid var(--border-color);
-    background: rgba(255, 255, 255, 0.03);
+    background: #ffffff;
     color: var(--text-secondary);
     border-radius: 12px;
     cursor: pointer;
     font-size: 0.95rem;
     font-weight: 600;
     transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .filter-btn:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: #f1f5f9;
     border-color: var(--accent-purple);
+    color: var(--accent-purple);
     transform: translateY(-2px);
 }
 
 .filter-btn.active {
-    background: linear-gradient(135deg, #9333ea 0%, #3b82f6 100%);
+    background: linear-gradient(135deg, var(--accent-purple) 0%, var(--accent-blue) 100%);
     border-color: transparent;
     color: white;
-    box-shadow: 0 5px 20px rgba(147, 51, 234, 0.4);
+    box-shadow: 0 10px 20px rgba(139, 92, 246, 0.2);
 }
 
 /* ===== 기간 정보 표시 ===== */
@@ -284,11 +278,11 @@ body::before {
 
 /* ===== 결과 뷰 (새로운 창 느낌) ===== */
 .results-view {
-    background: rgba(10, 14, 39, 0.7);
-    border: 2px solid var(--accent-blue);
+    background: #ffffff;
+    border: 1px solid var(--border-color);
     border-radius: 30px;
     padding: 30px;
-    box-shadow: 0 0 50px rgba(59, 130, 246, 0.2);
+    box-shadow: var(--shadow-medium);
     animation: fadeInScale 0.5s ease-out;
 }
 
@@ -318,14 +312,14 @@ body::before {
     align-items: center;
     gap: 10px;
     padding: 12px 24px;
-    background: rgba(255, 255, 255, 0.05);
+    background: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: 12px;
     color: var(--text-primary);
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-soft);
 }
 
 .back-btn span {
@@ -379,8 +373,7 @@ body::before {
 
 /* ===== 뉴스 카드 ===== */
 .news-card {
-    background: var(--bg-card);
-    backdrop-filter: blur(20px);
+    background: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: 20px;
     padding: 25px;
@@ -388,6 +381,7 @@ body::before {
     animation: fadeInUp 0.6s ease-out both;
     position: relative;
     overflow: hidden;
+    box-shadow: var(--shadow-soft);
 }
 
 .news-card::before {
@@ -404,7 +398,7 @@ body::before {
 
 .news-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 20px 60px rgba(147, 51, 234, 0.3);
+    box-shadow: var(--shadow-medium);
     border-color: var(--accent-purple);
 }
 
@@ -427,8 +421,9 @@ body::before {
     display: flex;
     align-items: baseline;
     gap: 5px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     font-weight: 700;
+    color: white;
 }
 
 .score-value {
@@ -450,7 +445,8 @@ body::before {
 .source-badge,
 .date-badge {
     padding: 6px 12px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--bg-light);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 0.8rem;
     color: var(--text-secondary);
@@ -476,11 +472,12 @@ body::before {
 
 .keyword-tag {
     padding: 6px 12px;
-    background: linear-gradient(135deg, rgba(147, 51, 234, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%);
-    border: 1px solid rgba(147, 51, 234, 0.3);
+    background: #f3f0ff;
+    border: 1px solid #ddd6fe;
     border-radius: 8px;
     font-size: 0.85rem;
-    color: #a78bfa;
+    color: #6d28d9;
+    font-weight: 500;
 }
 
 .card-actions {
@@ -524,7 +521,7 @@ body::before {
 
 .action-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
 }
 
 /* ===== 빈 상태 ===== */
@@ -532,9 +529,8 @@ body::before {
     grid-column: 1 / -1;
     text-align: center;
     padding: 80px 20px;
-    background: var(--bg-card);
-    backdrop-filter: blur(20px);
-    border: 1px solid var(--border-color);
+    background: var(--bg-light);
+    border: 1px dashed var(--border-color);
     border-radius: 20px;
 }
 
