@@ -91,10 +91,11 @@ def _fetch_newsapi(api_key: str, query: str, max_results: int = 10) -> List[dict
         return []
 
 
-def scrape_google_news(max_per_query: int = 10, max_total: int = 50) -> List[dict]:
+def scrape_google_news(max_per_query: int = 10, max_total: int = 50, query_list: List[str] = None) -> List[dict]:
     """
     RSS + NewsAPI 병행 수집.
     API 키 있으면 둘 다 사용, 없으면 RSS만 사용.
+    query_list가 있으면 해당 키워드들로 검색.
 
     Returns:
         [{"title": str, "url": str, "source": "구글뉴스", ...}, ...]
@@ -102,8 +103,11 @@ def scrape_google_news(max_per_query: int = 10, max_total: int = 50) -> List[dic
     seen_urls = set()
     results = []
 
+    # 사용할 쿼리 목록 결정
+    queries = query_list if query_list else SEARCH_QUERIES
+
     # 1. RSS (항상 시도)
-    for query in SEARCH_QUERIES:
+    for query in queries:
         if len(results) >= max_total:
             break
         for item in _fetch_rss(query, max_results=max_per_query):
@@ -117,7 +121,7 @@ def scrape_google_news(max_per_query: int = 10, max_total: int = 50) -> List[dic
     # 2. NewsAPI (키 있으면 추가)
     api_key = (os.getenv("NEWS_API_KEY") or "").strip()
     if api_key:
-        for query in SEARCH_QUERIES:
+        for query in queries:
             if len(results) >= max_total:
                 break
             for item in _fetch_newsapi(api_key, query, max_results=5):

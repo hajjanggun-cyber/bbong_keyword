@@ -102,9 +102,10 @@ def _get_video_details(api_key: str, video_ids: List[str]) -> List[dict]:
         return []
 
 
-def scrape_youtube(max_per_query: int = 5, max_total: int = 30) -> List[dict]:
+def scrape_youtube(max_per_query: int = 5, max_total: int = 30, query_list: List[str] = None) -> List[dict]:
     """
     키워드 조합으로 유튜브 검색 (7일 이내, 10만 회 이상).
+    query_list가 있으면 해당 키워드들로 검색, 없으면 기본 SEARCH_QUERIES 사용.
 
     Returns:
         [{"title": str, "url": str, "source": "유튜브", "views": int, "upload_date": str}, ...]
@@ -113,7 +114,10 @@ def scrape_youtube(max_per_query: int = 5, max_total: int = 30) -> List[dict]:
     seen_urls = set()
     results = []
 
-    for query in SEARCH_QUERIES:
+    # 사용할 쿼리 목록 결정
+    queries = query_list if query_list else SEARCH_QUERIES
+
+    for query in queries:
         if len(results) >= max_total:
             break
         items = _search_youtube(api_key, query, max_results=max_per_query)
