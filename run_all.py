@@ -118,9 +118,9 @@ def _load_existing_data() -> list:
         with open(data_path, "r", encoding="utf-8") as f:
             content = f.read()
             
-        # JS 변수 선언(const keywordData = ) 제거하고 JSON 파싱
-        # 예: const keywordData = [...];
-        match = re.search(r"const\s+keywordData\s*=\s*(\[.*\]);", content, re.DOTALL)
+        # JS 변수 선언(var 또는 const keywordData = ) 제거하고 JSON 파싱
+        # 예: var keywordData = [...];
+        match = re.search(r"(?:var|const)\s+keywordData\s*=\s*(\[.*\]);", content, re.DOTALL)
         if match:
             json_str = match.group(1)
             return json.loads(json_str)

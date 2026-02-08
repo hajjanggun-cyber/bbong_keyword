@@ -70,7 +70,7 @@ COLUMN_WIDTHS = {
     "조회수": 14,
 }
 
-TOP_N = 30
+TOP_N = 100
 
 
 def _ensure_columns(df: pd.DataFrame) -> pd.DataFrame:
