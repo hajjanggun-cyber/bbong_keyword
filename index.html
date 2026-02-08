@@ -98,15 +98,9 @@
             </div>
         );
 
-        // 필터 패널 컴포넌트
-        const FilterPanel = ({ category, setCategory, period, setPeriod }) => {
+        // 필터 패널 컴포넌트 (기간 필터 제거, 주제만 유지)
+        const FilterPanel = ({ category, setCategory }) => {
             const categories = ['정치', '경제', '사회', '장년'];
-            const periods = [
-                { value: 'today', label: '오늘' },
-                { value: '3days', label: '3일' },
-                { value: '1week', label: '1주일' },
-                { value: '1month', label: '1개월' }
-            ];
 
             return (
                 <div className="filter-panel">
@@ -124,20 +118,8 @@
                             ))}
                         </div>
                     </div>
-
-                    <div className="filter-section">
-                        <h3 className="filter-title">⏰ 기간</h3>
-                        <div className="filter-buttons">
-                            {periods.map(p => (
-                                <button
-                                    key={p.value}
-                                    className={`filter-btn ${period === p.value ? 'active' : ''}`}
-                                    onClick={() => setPeriod(p.value)}
-                                >
-                                    {p.label}
-                                </button>
-                            ))}
-                        </div>
+                    <div className="period-info">
+                        <span className="period-label">📅 오늘의 이슈</span>
                     </div>
                 </div>
             );
@@ -145,8 +127,8 @@
 
         const App = () => {
             const [category, setCategory] = useState('정치');
-            const [period, setPeriod] = useState('1month');  // 기본값을 1개월로 변경
             const [isSearched, setIsSearched] = useState(false);
+            const period = 'today';  // 고정값: 오늘
 
             const filteredData = useMemo(() => {
                 if (!window.keywordData) return [];
@@ -193,8 +175,6 @@
                                 <FilterPanel
                                     category={category}
                                     setCategory={setCategory}
-                                    period={period}
-                                    setPeriod={setPeriod}
                                 />
                                 <div className="search-section">
                                     <button className="search-btn" onClick={handleSearch}>
@@ -210,7 +190,7 @@
                                     </button>
                                     <div className="results-summary">
                                         <span className="summary-tag">#{category}</span>
-                                        <span className="summary-tag">#{period === 'today' ? '오늘' : period === '3days' ? '3일' : period === '1week' ? '1주일' : '1개월'}</span>
+                                        <span className="summary-tag">#오늘</span>
                                     </div>
                                 </div>
 
