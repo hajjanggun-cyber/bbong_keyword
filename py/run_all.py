@@ -103,6 +103,9 @@ def main() -> None:
     from keyword_dict import SEARCH_TOPICS, AGGRO_DICTIONARY
     
     
+    # 스크래퍼 상태 추적
+    scraper_status = {"youtube": "OK", "google": "OK", "naver": "OK"}
+
     # 사용자 선택
     print("\n[주제 선택]")
     topics = list(SEARCH_TOPICS.keys()) # ['정치', '경제', '사회', '이슈', '장년']
@@ -134,7 +137,9 @@ def main() -> None:
             all_items.append(row)
         print(f"    → {len(scored_yt)}건")
     except Exception as e:
-        print(f"    → 건너뜀 (오류: {e})")
+        err_msg = str(e)
+        print(f"    → 건너뜀 (오류: {err_msg})")
+        scraper_status["youtube"] = f"오류: {err_msg}"
 
     # 2. 구글 뉴스
     try:
@@ -147,7 +152,9 @@ def main() -> None:
             all_items.append(row)
         print(f"    → {len(scored_google)}건")
     except Exception as e:
-        print(f"    → 건너뜀 (오류: {e})")
+        err_msg = str(e)
+        print(f"    → 건너뜀 (오류: {err_msg})")
+        scraper_status["google"] = f"오류: {err_msg}"
 
     # 3. 네이버 뉴스
     try:
@@ -168,7 +175,9 @@ def main() -> None:
             all_items.append(row)
         print(f"    → {len(scored_naver)}건")
     except Exception as e:
-        print(f"    → 건너뜀 (오류: {e})")
+        err_msg = str(e)
+        print(f"    → 건너뜀 (오류: {err_msg})")
+        scraper_status["naver"] = f"오류: {err_msg}"
 
     if not all_items:
         print("수집된 데이터가 없습니다. .env에 YOUTUBE_API_KEY를 확인하고, feedparser를 설치했는지 확인하세요.")
@@ -189,7 +198,7 @@ def main() -> None:
         # path = export_to_excel(df_top)
         # print(f"\n엑셀 파일 생성 완료: {path}")
 
-        json_path = export_to_js(df_top)
+        json_path = export_to_js(df_top, scraper_status=scraper_status)
         print(f"웹 데이터 파일 생성 완료: {json_path}")
         
         print(f"총 {len(df_top)}건 (전체 카테고리 통합)")

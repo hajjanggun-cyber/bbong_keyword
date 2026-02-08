@@ -104,13 +104,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 sourceClass = 'source-youtube';
             }
 
-            // Create links HTML
-            let linkUrl = item['유튜브_URL'] || item['뉴스기사_URL'] || '';
+            // Create links HTML (Multi-line)
+            const urls = [];
+            // 순서대로 추가 (유튜브/뉴스1 -> 뉴스2 -> 뉴스3)
+            if (item['유튜브_URL']) urls.push(item['유튜브_URL']);
+            if (item['뉴스기사_URL']) urls.push(item['뉴스기사_URL']);
+            if (item['뉴스기사2_URL']) urls.push(item['뉴스기사2_URL']);
+            if (item['뉴스기사3_URL']) urls.push(item['뉴스기사3_URL']);
+
+            // 중복 제거 및 공백 제거
+            const uniqueUrls = [...new Set(urls.filter(u => u))];
+
             let linksHtml = '';
-            if (linkUrl) {
-                linksHtml = `<a href="${linkUrl}" target="_blank">${linkUrl}</a>`;
-            } else {
-                if (item['뉴스기사2_URL']) linksHtml = `<a href="${item['뉴스기사2_URL']}" target="_blank">${item['뉴스기사2_URL']}</a>`;
+            if (uniqueUrls.length > 0) {
+                linksHtml = uniqueUrls.map(url => `<a href="${url}" target="_blank">${url}</a>`).join('<br>');
             }
 
             tr.innerHTML = `
@@ -130,5 +137,30 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof keywordData === 'undefined') {
         // Just show alert or log if needed, but overlay covers it.
         console.error("Data file not loaded.");
+    } else {
+        // Check for scraper errors
+        if (typeof scraperStatus !== 'undefined') {
+            const errors = [];
+            for (const [source, status] of Object.entries(scraperStatus)) {
+                if (status !== 'OK') {
+                    // 소스 이름 한글로 변환
+                    let sourceName = source;
+                    if (source === 'youtube') sourceName = '유튜브';
+                    else if (source === 'google') sourceName = '구글뉴스';
+                    else if (source === 'naver') sourceName = '네이버뉴스';
+
+                    errors.push(`[${sourceName}] ${status}`);
+                }
+            }
+
+            if (errors.length > 0) {
+                const alertDiv = document.createElement('div');
+                alertDiv.style.cssText = 'background: #ffebee; color: #c62828; padding: 15px; margin: 20px 0; border-radius: 8px; border: 1px solid #ef9a9a; font-weight: bold; line-height: 1.6;';
+                alertDiv.innerHTML = `⚠️ 데이터 수집 중 일부 오류가 발생했습니다 (건너뜀):<br>${errors.join('<br>')}`;
+
+                // content 내부 최상단에 추가
+                content.insertBefore(alertDiv, content.firstChild);
+            }
+        }
     }
 });

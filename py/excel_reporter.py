@@ -313,6 +313,7 @@ def export_to_js(
     output_path: Optional[str] = None,
     score_column: str = "추천점수",
     ascending: bool = False,
+    scraper_status: dict = None,
 ) -> str:
     """
     DataFrame을 웹용 JS 파일로 저장합니다.
@@ -359,7 +360,11 @@ def export_to_js(
         # JS 저장
         data = out.to_dict(orient="records")
         json_str = json.dumps(data, ensure_ascii=False, indent=2)
+        
+        status_str = json.dumps(scraper_status or {}, ensure_ascii=False, indent=2)
+        
         js_content = f"const keywordData = {json_str};\n"
+        js_content += f"const scraperStatus = {status_str};\n"
 
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(js_content)
