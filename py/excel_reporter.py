@@ -360,21 +360,15 @@ def export_to_js(
         js_content = f"const keywordData = {json_str};\n"
         js_content += f"const scraperStatus = {status_str};\n"
 
-        # 두 곳에 모두 저장 (web 폴더 및 루트)
+        # 루트 디렉토리에 저장
         root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        target_paths = [
-            os.path.join(root_dir, "web", "data.js"),
-            os.path.join(root_dir, "data.js")
-        ]
-
-        main_path = ""
-        for path in target_paths:
-            os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
-            with open(path, "w", encoding="utf-8") as f:
-                f.write(js_content)
-            if not main_path: main_path = path
+        output_path = os.path.join(root_dir, "data.js")
         
-        return main_path
+        os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write(js_content)
+        
+        return output_path
 
     except Exception as e:
         print(f"[오류] JS 저장 실패: {e}")
