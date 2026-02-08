@@ -131,14 +131,15 @@
             const period = 'today';  // 고정값: 오늘
 
             const filteredData = useMemo(() => {
+                // 어떤 환경에서도 데이터를 확실히 가져오도록 개선
                 const rawData = window.keywordData || (typeof keywordData !== 'undefined' ? keywordData : []);
                 if (!rawData || rawData.length === 0) return [];
 
+                // 날짜 필터를 아예 제거하고 카테고리만 확인 (수집된 건 무조건 표시)
                 return rawData
-                    .filter(item => item.카테고리 === category)
-                    .filter(item => isWithinPeriod(item.업로드일, period))
-                    .sort((a, b) => b.추천점수 - a.추천점수);
-            }, [category, period]);
+                    .filter(item => String(item.카테고리).trim() === category)
+                    .sort((a, b) => (Number(b.추천점수) || 0) - (Number(a.추천점수) || 0));
+            }, [category]);
 
             const handleSearch = () => {
                 setIsSearched(true);
