@@ -39,6 +39,7 @@ OUTPUT_COLUMNS_BASE = [
     "제목",
     "추천점수",
     "키워드",
+    "카테고리",
     "출처",
     "유튜브_URL",
     "뉴스기사_URL",
@@ -57,6 +58,7 @@ COLUMN_WIDTHS = {
     "제목": 50,
     "추천점수": 12,
     "키워드": 14,
+    "카테고리": 10,
     "출처": 14,
     "유튜브_URL": 50,
     "뉴스기사_URL": 50,
@@ -77,6 +79,7 @@ def _ensure_columns(df: pd.DataFrame) -> pd.DataFrame:
         "title": "제목",
         "score": "추천점수",
         "score_keywords": "키워드",
+        "category": "카테고리",
         "source": "출처",
         "youtube_url": "유튜브_URL",
         "news_url": "뉴스기사_URL",
@@ -106,8 +109,8 @@ def _set_column_widths(worksheet) -> None:
         print(f"[경고] 컬럼 너비 설정 중 오류: {e}")
 
 
-# 가운데 정렬할 컬럼 (순위, 추천점수, 키워드, 출처)
-CENTER_ALIGN_COLUMNS = {"순위", "추천점수", "키워드", "출처"}
+# 가운데 정렬할 컬럼 (순위, 추천점수, 키워드, 출처, 카테고리)
+CENTER_ALIGN_COLUMNS = {"순위", "추천점수", "키워드", "출처", "카테고리"}
 
 
 def _set_header_center_alignment(worksheet, num_columns: int) -> None:
