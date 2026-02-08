@@ -143,10 +143,9 @@
             );
         };
 
-        // 메인 앱 컴포넌트
         const App = () => {
             const [category, setCategory] = useState('정치');
-            const [period, setPeriod] = useState('today');
+            const [period, setPeriod] = useState('1month');  // 기본값을 1개월로 변경
             const [isSearched, setIsSearched] = useState(false);
 
             const filteredData = useMemo(() => {
