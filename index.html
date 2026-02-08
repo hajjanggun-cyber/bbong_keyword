@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>하소장의 실시간 이슈 검색</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- data.js를 가장 먼저 로드 -->
+    <script src="data.js?v=20260208"></script>
+</head>
+
+<body>
+    <!-- React 라이브러리 로드 -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo } = React;
+
+        // 날짜 계산 함수
+        const isWithinPeriod = (dateStr, period) => {
+            if (!dateStr) return true; // 날짜 없으면 모두 표시
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const itemDate = new Date(dateStr);
+            itemDate.setHours(0, 0, 0, 0);
+
+            const diffTime = today - itemDate;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+            if (period === 'today') return diffDays >= 0 && diffDays <= 0;
+            if (period === '3days') return diffDays >= 0 && diffDays <= 3;
+            if (period === '1week') return diffDays >= 0 && diffDays <= 7;
+            if (period === '1month') return diffDays >= 0 && diffDays <= 30;
+            return true;
+        };
+
+        // 점수에 따른 색상 그라디언트
+        const getScoreColor = (score) => {
+            if (score >= 15) return 'linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%)';
+            if (score >= 10) return 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)';
+            if (score >= 7) return 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)';
+            return 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)';
+        };
+
+        // 점수 뱃지 컴포넌트
+        const ScoreBadge = ({ score }) => (
+            <div className="score-badge" style={{ background: getScoreColor(score) }}>
+                <span className="score-value">{score}</span>
+                <span className="score-label">점</span>
+            </div>
+        );
+
+        // 뉴스 카드 컴포넌트
+        const NewsCard = ({ item, index }) => (
+            <div className="news-card" style={{ animationDelay: `${index * 0.05}s` }}>
+                <div className="card-header">
+                    <ScoreBadge score={item.추천점수} />
+                    <div className="card-meta">
+                        <span className="source-badge">{item.출처}</span>
+                        <span className="date-badge">{item.업로드일}</span>
+                    </div>
+                </div>
+
+                <h3 className="news-title">{item.제목}</h3>
+
+                {item.키워드 && (
+                    <div className="keywords">
+                        {item.키워드.split(',').map((kw, i) => (
+                            <span key={i} className="keyword-tag">{kw.trim()}</span>
+                        ))}
+                    </div>
+                )}
+
+                <div className="card-actions">
+                    {item.유튜브_URL && (
+                        <a href={item.유튜브_URL} target="_blank" rel="noopener noreferrer" className="action-btn youtube">
+                            <span>▶</span> 유튜브
+                        </a>
+                    )}
+                    {item.뉴스기사_URL && (
+                        <a href={item.뉴스기사_URL} target="_blank" rel="noopener noreferrer" className="action-btn news">
+                            <span>📰</span> 기사 보기
+                        </a>
+                    )}
+                    {item.뉴스기사2_URL && (
+                        <a href={item.뉴스기사2_URL} target="_blank" rel="noopener noreferrer" className="action-btn related">
+                            <span>🔗</span> 관련 기사
+                        </a>
+                    )}
+                </div>
+            </div>
+        );
+
+        // 필터 패널 컴포넌트
+        const FilterPanel = ({ category, setCategory, period, setPeriod }) => {
+            const categories = ['정치', '경제', '사회', '장년'];
+            const periods = [
+                { value: 'today', label: '오늘' },
+                { value: '3days', label: '3일' },
+                { value: '1week', label: '1주일' },
+                { value: '1month', label: '1개월' }
+            ];
+
+            return (
+                <div className="filter-panel">
+                    <div className="filter-section">
+                        <h3 className="filter-title">📌 주제</h3>
+                        <div className="filter-buttons">
+                            {categories.map(cat => (
+                                <button
+                                    key={cat}
+                                    className={`filter-btn ${category === cat ? 'active' : ''}`}
+                                    onClick={() => setCategory(cat)}
+                                >
+                                    {cat}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="filter-section">
+                        <h3 className="filter-title">⏰ 기간</h3>
+                        <div className="filter-buttons">
+                            {periods.map(p => (
+                                <button
+                                    key={p.value}
+                                    className={`filter-btn ${period === p.value ? 'active' : ''}`}
+                                    onClick={() => setPeriod(p.value)}
+                                >
+                                    {p.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // 메인 앱 컴포넌트
+        const App = () => {
+            const [category, setCategory] = useState('정치');
+            const [period, setPeriod] = useState('today');
+            const [isSearched, setIsSearched] = useState(false);
+
+            const filteredData = useMemo(() => {
+                if (!window.keywordData) return [];
+
+                return window.keywordData
+                    .filter(item => item.카테고리 === category)
+                    .filter(item => isWithinPeriod(item.업로드일, period))
+                    .sort((a, b) => b.추천점수 - a.추천점수);
+            }, [category, period]);
+
+            const handleSearch = () => {
+                setIsSearched(true);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            const handleBack = () => {
+                setIsSearched(false);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            return (
+                <div className="app">
+                    <header className="app-header">
+                        <div className="header-content">
+                            <div className="logo-section" onClick={handleBack} style={{ cursor: 'pointer' }}>
+                                <div className="logo-icon">🔥</div>
+                                <div>
+                                    <h1 className="app-title">하소장의 실시간 이슈 검색</h1>
+                                    <p className="app-subtitle">AI 기반 키워드 분석 시스템</p>
+                                </div>
+                            </div>
+                            {isSearched && (
+                                <div className="stats-badge">
+                                    <span className="stats-number">{filteredData.length}</span>
+                                    <span className="stats-label">개 이슈 탐지</span>
+                                </div>
+                            )}
+                        </div>
+                    </header>
+
+                    <main className="app-main">
+                        {!isSearched ? (
+                            <div className="search-view">
+                                <FilterPanel
+                                    category={category}
+                                    setCategory={setCategory}
+                                    period={period}
+                                    setPeriod={setPeriod}
+                                />
+                                <div className="search-section">
+                                    <button className="search-btn" onClick={handleSearch}>
+                                        확인 (이슈 분석 시작) 🔥
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="results-view">
+                                <div className="results-toolbar">
+                                    <button className="back-btn" onClick={handleBack}>
+                                        <span>←</span> 다시 선택하기
+                                    </button>
+                                    <div className="results-summary">
+                                        <span className="summary-tag">#{category}</span>
+                                        <span className="summary-tag">#{period === 'today' ? '오늘' : period === '3days' ? '3일' : period === '1week' ? '1주일' : '1개월'}</span>
+                                    </div>
+                                </div>
+
+                                <div className="news-grid">
+                                    {filteredData.length > 0 ? (
+                                        filteredData.map((item, index) => (
+                                            <NewsCard key={index} item={item} index={index} />
+                                        ))
+                                    ) : (
+                                        <div className="empty-state">
+                                            <div className="empty-icon">📭</div>
+                                            <h3>해당 기간에 뉴스가 없습니다</h3>
+                                            <p>다른 기간이나 카테고리를 선택해보세요</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </main>
+
+                    <footer className="app-footer">
+                        <p>© 2026 하소장의 실시간 이슈 검색 | Powered by AI</p>
+                    </footer>
+                </div>
+            );
+        };
+
+        // 렌더링
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>

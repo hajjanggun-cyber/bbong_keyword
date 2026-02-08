@@ -108,9 +108,12 @@ def _enrich_with_similar_news(df: pd.DataFrame, all_news: list) -> pd.DataFrame:
 def _load_existing_data() -> list:
     """기존 data.js에서 JSON 데이터 로드."""
     try:
-        # 프로젝트 루트 기준 data.js (현재 파일이 루트에 있음)
-        root_dir = os.path.dirname(os.path.abspath(__file__))
-        data_path = os.path.join(root_dir, "web", "data.js")
+        # 여러 경로 시도: web 폴더 우선, 그 다음 루트
+        paths = [
+            os.path.join(root_dir, "web", "data.js"),
+            os.path.join(root_dir, "data.js")
+        ]
+        data_path = next((p for p in paths if os.path.exists(p)), paths[0])
         
         if not os.path.exists(data_path):
             return []
