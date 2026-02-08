@@ -55,8 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const backBtn = document.createElement('button');
     backBtn.id = 'back-btn';
     backBtn.textContent = '초기화면';
-    // Style for Top-Right positioning
-    backBtn.style.cssText = 'display: none; position: absolute; top: 20px; right: 20px; padding: 8px 16px; font-size: 14px; background: #666; color: white; border: none; border-radius: 5px; cursor: pointer; z-index: 1000;';
+    // Style for Bottom-Center positioning
+    backBtn.style.cssText = 'display: none; margin: 30px auto; padding: 12px 30px; font-size: 16px; background: #666; color: white; border: none; border-radius: 8px; cursor: pointer; display: block;';
 
     // Add hover effect
     backBtn.addEventListener('mouseover', () => backBtn.style.background = '#555');
@@ -65,15 +65,16 @@ document.addEventListener('DOMContentLoaded', () => {
     backBtn.addEventListener('click', () => {
         // Reset UI
         content.style.display = 'none';
-        backBtn.style.display = 'none';
+        backBtn.style.display = 'none'; // This assumes backBtn is outside content or we hide content parent
+        // If we append to content, hiding content hides btn too.
         overlay.style.display = 'flex';
         setTimeout(() => {
             overlay.style.opacity = '1';
         }, 10);
     });
 
-    // Insert back button into body (absolute positioning works best relative to viewport or body)
-    document.body.appendChild(backBtn);
+    // Insert back button into content (so it appears below table)
+    content.appendChild(backBtn);
 
     // Helper: Parse date string "YYYY-MM-DD" or "2024-02-01 ..."
     function parseDate(dateStr) {

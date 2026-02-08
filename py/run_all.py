@@ -121,7 +121,12 @@ def main() -> None:
         choice = int(input("\n번호를 입력하세요: "))
         if 1 <= choice <= len(topics):
             selected_category = topics[choice - 1]
-            selected_keywords = SEARCH_TOPICS[selected_category]
+            if selected_category == "정치":
+                selected_keywords = SEARCH_TOPICS[selected_category]
+            else:
+                # 정치 외 카테고리는 해당 분야 '뉴스' 자체를 검색 (상위 기사 노출 유도)
+                # 예: "경제" -> ["경제", "경제 뉴스"]
+                selected_keywords = [selected_category, f"{selected_category} 뉴스"]
         else:
             print("잘못된 번호입니다. 프로그램을 종료합니다.")
             return
@@ -171,7 +176,13 @@ def main() -> None:
         }
         sid1 = naver_section_map.get(selected_category, "100")
         
-        naver = scrape_ranking_news(economy_count=5, society_count=5, total_limit=10, sid1=sid1) 
+        naver = scrape_ranking_news(
+            economy_count=5, 
+            society_count=5, 
+            total_limit=10, 
+            sid1=sid1,
+            query_list=selected_keywords  # API 사용시에도 해당 카테고리로 검색
+        )  
         
         scored_naver = analyze_articles(naver, title_key="title")
         for item in scored_naver:
