@@ -4,6 +4,8 @@
 
 import os
 import re
+import subprocess
+from datetime import datetime
 
 # .env 로드 (프로젝트 루트 기준)
 try:
@@ -204,6 +206,37 @@ def main() -> None:
         print(f"총 {len(df_top)}건 (전체 카테고리 통합)")
     else:
         print("수집된 데이터가 없습니다.")
+
+    # 7. 깃허브 자동 푸시
+    git_push()
+
+
+def git_push():
+    """데이터 생성 후 깃허브에 자동 푸시"""
+    print("\n[Git] 깃허브 자동 푸시 시작...")
+    try:
+        # 프로젝트 루트로 이동 (현재 py/ 폴더에 있다면)
+        # run_all.py가 py/ 안에 있으므로, 부모 디렉토리가 루트
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        root_dir = os.path.dirname(script_dir)
+        
+        # 1. git add
+        subprocess.run(["git", "add", "."], cwd=root_dir, check=True)
+        
+        # 2. git commit
+        # 변경사항이 없으면 에러가 날 수 있으므로 check=False로 하고 출력만 확인하거나
+        # status를 먼저 체크할 수도 있음. 여기서는 간단히 try로 감쌈.
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        commit_msg = f"Auto: Update data files ({current_time})"
+        subprocess.run(["git", "commit", "-m", commit_msg], cwd=root_dir, check=False)
+        
+        # 3. git push
+        subprocess.run(["git", "push", "origin", "main"], cwd=root_dir, check=True)
+        print("[Git] 푸시 완료!")
+        
+    except Exception as e:
+        print(f"[Git] 푸시 실패: {e}")
+
 
 
 if __name__ == "__main__":
