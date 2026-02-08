@@ -30,7 +30,7 @@ RSS_BASE = "https://news.google.com/rss/search"
 NEWSAPI_URL = "https://newsapi.org/v2/everything"
 
 
-def _fetch_rss(query: str, max_results: int = 15) -> List[dict]:
+def _fetch_rss(query: str, max_results: int = 15, days_back: int = 7) -> List[dict]:
     """구글 뉴스 RSS에서 기사 수집 (무료, API 키 불필요)."""
     if feedparser is None:
         return []
@@ -38,17 +38,26 @@ def _fetch_rss(query: str, max_results: int = 15) -> List[dict]:
     url = f"{RSS_BASE}?q={quote_plus(query)}&hl=ko&gl=KR&ceid=KR:ko"
     feed = feedparser.parse(url, request_headers={"User-Agent": "Mozilla/5.0"})
     results = []
+    cutoff_date = datetime.now() - timedelta(days=days_back)
+    
     for entry in feed.get("entries", [])[:max_results]:
         title = (entry.get("title") or "").strip()
         link = entry.get("link") or entry.get("id", "")
         pub_parsed = entry.get("published_parsed")
         published = time.strftime("%Y-%m-%d", pub_parsed) if pub_parsed else ""
+        
+        # 날짜 필터링
+        if pub_parsed:
+            pub_date = datetime(*pub_parsed[:6])
+            if pub_date < cutoff_date:
+                continue
+        
         if title and len(title) > 3:
             results.append({
                 "title": title,
                 "url": link,
                 "source": "구글뉴스",
-                "views": "",
+                "section": published,
                 "upload_date": published,
             })
     return results
@@ -85,14 +94,18 @@ def _fetch_newsapi(api_key: str, query: str, max_results: int = 10) -> List[dict
     return results
 
 
-def scrape_google_news(max_per_query: int = 10, max_total: int = 50, query_list: List[str] = None) -> List[dict]:
+def scrape_google_news(max_per_query: int = 10, max_total: int = 50, query_list: List[str] = None, days_back: int = 7) -> List[dict]:
     """
-    RSS + NewsAPI 병행 수집.
-    API 키 있으면 둘 다 사용, 없으면 RSS만 사용.
-    query_list가 있으면 해당 키워드들로 검색.
-
+    구글 뉴스 수집 (RSS + NewsAPI).
+    
+    Args:
+        max_per_query: 쿼리당 최대 결과 수
+        max_total: 전체 최대 결과 수
+        query_list: 검색 키워드 리스트 (None이면 기본값 사용)
+        days_back: 검색 기간 (일 단위, 기본 7일)
+    
     Returns:
-        [{"title": str, "url": str, "source": "구글뉴스", ...}, ...]
+        [{"title": str, "url": str, "source": "구글뉴스", "section": str}, ...]
     """
     seen_urls = set()
     results = []
@@ -104,7 +117,7 @@ def scrape_google_news(max_per_query: int = 10, max_total: int = 50, query_list:
     for query in queries:
         if len(results) >= max_total:
             break
-        for item in _fetch_rss(query, max_results=max_per_query):
+        for item in _fetch_rss(query, max_results=max_per_query, days_back=days_back):
             url = item.get("url", "") or item.get("title", "")
             if url and url not in seen_urls:
                 seen_urls.add(url)

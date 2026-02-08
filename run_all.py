@@ -129,6 +129,38 @@ def _load_existing_data() -> list:
         return []
 
 
+def _collect_with_auto_expand(scraper_func, min_results=5, **kwargs):
+    """
+    자동 기간 확장 수집: 1일 → 3일 → 7일 → 30일
+    최소 min_results개 이상 수집될 때까지 기간 확장.
+    
+    Args:
+        scraper_func: 스크래퍼 함수 (days_back 파라미터 지원 필요)
+        min_results: 최소 결과 개수 (기본 5개)
+        **kwargs: 스크래퍼 함수에 전달할 추가 인자
+    
+    Returns:
+        수집된 결과 리스트
+    """
+    date_ranges = [1, 3, 7, 30]  # 오늘 → 3일 → 1주 → 1개월
+    
+    for days_back in date_ranges:
+        try:
+            results = scraper_func(days_back=days_back, **kwargs)
+            if len(results) >= min_results:
+                if days_back > 1:
+                    print(f"    (기간 확장: {days_back}일)")
+                return results
+        except Exception:
+            continue
+    
+    # 모든 시도 실패 시 마지막 시도 결과 반환 (빈 리스트일 수 있음)
+    try:
+        return scraper_func(days_back=30, **kwargs)
+    except Exception:
+        return []
+
+
 def main() -> None:
     """유튜브·구글·네이버 수집 → 어그로 점수 → 엑셀 1개 파일."""
     all_items = []
@@ -165,7 +197,13 @@ def main() -> None:
     # 1. 유튜브
     try:
         print(f"  유튜브 수집 중 ({selected_keywords[:3]}...)")
-        yt = scrape_youtube(max_per_query=3, max_total=10, query_list=selected_keywords)
+        yt = _collect_with_auto_expand(
+            scrape_youtube,
+            min_results=5,
+            max_per_query=3,
+            max_total=10,
+            query_list=selected_keywords
+        )
         scored_yt = analyze_articles(yt, title_key="title")
         for item in scored_yt:
             row = _to_row(item, "유튜브")
@@ -180,7 +218,13 @@ def main() -> None:
     # 2. 구글 뉴스
     try:
         print(f"  구글 뉴스 수집 중...")
-        google = scrape_google_news(max_per_query=5, max_total=10, query_list=selected_keywords)
+        google = _collect_with_auto_expand(
+            scrape_google_news,
+            min_results=5,
+            max_per_query=5,
+            max_total=10,
+            query_list=selected_keywords
+        )
         scored_google = analyze_articles(google, title_key="title")
         for item in scored_google:
             row = _to_row(item, "구글뉴스")

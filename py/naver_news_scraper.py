@@ -129,19 +129,18 @@ def _fetch_naver_api(client_id: str, client_secret: str, query: str, display: in
 # ========== 통합 ==========
 
 
-def scrape_ranking_news(
-    economy_count: int = 10,
-    society_count: int = 10,
-    total_limit: int = 30,
-    sid1: str = None,
-    query_list: List[str] = None
-) -> List[dict]:
+def scrape_ranking_news(economy_count: int = 10, society_count: int = 10, total_limit: int = 30, sid1: int = 101, query_list: List[str] = None, days_back: int = 7) -> List[dict]:
     """
-    스크래핑 + API 병행 수집.
-    API 키 있으면 둘 다 사용, 없으면 스크래핑만.
-    sid1이 있으면 해당 섹션 랭킹 수집. 없으면 경제(101)+사회(102) 수집.
-    query_list가 있으면 API 검색 시 해당 키워드 사용.
-
+    네이버 뉴스 수집 (랭킹 + API).
+    
+    Args:
+        economy_count: 경제 섹션 최대 개수
+        society_count: 사회 섹션 최대 개수
+        total_limit: 전체 최대 결과 수
+        sid1: 섹션 코드 (100=정치, 101=경제, 102=사회 등)
+        query_list: 검색 키워드 리스트 (API 사용시)
+        days_back: 검색 기간 (일 단위, 랭킹에는 미적용)
+    
     Returns:
         [{"title": str, "url": str, "source": "네이버뉴스", "section": str}, ...]
     """

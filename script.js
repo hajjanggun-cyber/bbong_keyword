@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // State for selection
     let currentTopic = '정치';
-    let currentPeriod = '1week'; // Default to 1 week to show recent data
+    let currentPeriod = 'today'; // Default to today (auto-expands in backend)
 
     // UI Elements
     const topicBtns = document.querySelectorAll('#topic-group .select-btn');

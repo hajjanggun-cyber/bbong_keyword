@@ -41,9 +41,9 @@ def _get_api_key() -> str:
     return key.strip()
 
 
-def _search_youtube(api_key: str, query: str, max_results: int = 10) -> List[dict]:
+def _search_youtube(api_key: str, query: str, max_results: int = 10, days_back: int = 7) -> List[dict]:
     """키워드로 유튜브 검색."""
-    published_after = (datetime.utcnow() - timedelta(days=DAYS_BACK)).strftime("%Y-%m-%dT00:00:00Z")
+    published_after = (datetime.utcnow() - timedelta(days=days_back)).strftime("%Y-%m-%dT00:00:00Z")
     url = "https://www.googleapis.com/youtube/v3/search"
     params = {
         "part": "snippet",
@@ -98,11 +98,16 @@ def _get_video_details(api_key: str, video_ids: List[str]) -> List[dict]:
         return []
 
 
-def scrape_youtube(max_per_query: int = 5, max_total: int = 30, query_list: List[str] = None) -> List[dict]:
+def scrape_youtube(max_per_query: int = 5, max_total: int = 30, query_list: List[str] = None, days_back: int = 7) -> List[dict]:
     """
-    키워드 조합으로 유튜브 검색 (7일 이내, 10만 회 이상).
-    query_list가 있으면 해당 키워드들로 검색, 없으면 기본 SEARCH_QUERIES 사용.
-
+    키워드 조합으로 유튜브 검색.
+    
+    Args:
+        max_per_query: 쿼리당 최대 결과 수
+        max_total: 전체 최대 결과 수
+        query_list: 검색 키워드 리스트 (None이면 기본값 사용)
+        days_back: 검색 기간 (일 단위, 기본 7일)
+    
     Returns:
         [{"title": str, "url": str, "source": "유튜브", "views": int, "upload_date": str}, ...]
     """
@@ -116,7 +121,7 @@ def scrape_youtube(max_per_query: int = 5, max_total: int = 30, query_list: List
     for query in queries:
         if len(results) >= max_total:
             break
-        items = _search_youtube(api_key, query, max_results=max_per_query)
+        items = _search_youtube(api_key, query, max_results=max_per_query, days_back=days_back)
         for item in items:
             if item["url"] not in seen_urls:
                 seen_urls.add(item["url"])
