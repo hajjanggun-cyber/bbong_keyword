@@ -13,8 +13,33 @@
 <body>
     <div id="landing-overlay">
         <div class="landing-content">
-            <h1>아래를 클릭시 국뽕 키워드가 실시간 확인됩니다</h1>
-            <button id="enter-btn">확인하기</button>
+            <h1>키워드 분석 리포트</h1>
+
+            <div class="selection-group">
+                <h3>(1) 주제 선택</h3>
+                <div class="button-group" id="topic-group">
+                    <button class="select-btn active" data-value="정치">정치</button>
+                    <button class="select-btn" data-value="경제">경제</button>
+                    <button class="select-btn" data-value="사회">사회</button>
+                    <button class="select-btn" data-value="이슈">이슈</button>
+                    <button class="select-btn" data-value="장년">장년</button>
+                </div>
+            </div>
+
+            <div class="selection-group">
+                <h3>(2) 기간 선택</h3>
+                <div class="button-group" id="period-group">
+                    <button class="select-btn active" data-value="today">오늘</button>
+                    <button class="select-btn" data-value="3days">3일</button>
+                    <button class="select-btn" data-value="1week">1주</button>
+                    <button class="select-btn" data-value="1month">1개월</button>
+                </div>
+            </div>
+
+            <div class="action-group">
+                <h3>(3) 실행</h3>
+                <button id="search-btn">검색</button>
+            </div>
         </div>
     </div>
 

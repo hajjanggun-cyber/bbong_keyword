@@ -175,27 +175,92 @@ tr:hover td {
 }
 
 .landing-content h1 {
-    font-size: 24px;
-    margin-bottom: 30px;
+    font-size: 28px;
+    margin-bottom: 40px;
     color: #333;
+    font-weight: 800;
 }
 
-#enter-btn {
-    padding: 12px 30px;
-    font-size: 18px;
+.selection-group {
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+.selection-group h3 {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.select-btn {
+    padding: 10px 20px;
+    font-size: 15px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #555;
+}
+
+.select-btn:hover {
+    background-color: #f0f0f0;
+    border-color: #ccc;
+}
+
+.select-btn.active {
     background-color: #007bff;
     color: white;
+    border-color: #007bff;
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0, 123, 255, 0.2);
+}
+
+.action-group {
+    margin-top: 40px;
+    border-top: 1px solid #eee;
+    padding-top: 30px;
+}
+
+.action-group h3 {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+#search-btn {
+    padding: 15px 50px;
+    font-size: 18px;
+    background-color: #28a745;
+    color: white;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
+    transition: all 0.2s;
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(40, 167, 69, 0.2);
 }
 
-#enter-btn:hover {
-    background-color: #0056b3;
+#search-btn:hover {
+    background-color: #218838;
     transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(40, 167, 69, 0.3);
 }
 
-#enter-btn:active {
+#search-btn:active {
     transform: translateY(0);
+}
+
+/* Hide Enter Button styles as it is replaced */
+#enter-btn {
+    display: none;
 }
