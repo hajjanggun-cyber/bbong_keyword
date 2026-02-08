@@ -292,8 +292,8 @@ def main() -> None:
         df_new["추천점수"] = pd.to_numeric(df_new["score"], errors="coerce").fillna(0)
         df_new = df_new.sort_values(by="추천점수", ascending=False)
         
-        # 상위 100개 + 비슷한 뉴스 보강
-        df_new = df_new.head(100).copy()
+        # 상위 30개 + 비슷한 뉴스 보강
+        df_new = df_new.head(30).copy()
         df_new = _enrich_with_similar_news(df_new, all_items)
         
         # DataFrame -> Dict List 변환
