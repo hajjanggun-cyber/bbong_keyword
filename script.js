@@ -11,12 +11,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const content = document.getElementById('content');
     const tbody = document.querySelector('#keyword-table tbody');
 
-    // Handle Topic Selection
+    // Handle Topic Selection (Immediate Search)
     topicBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             topicBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             currentTopic = btn.dataset.value;
+
+            // Trigger Search Immediately
+            performSearch();
         });
     });
 
@@ -29,28 +32,32 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Handle Search Click
-    if (searchBtn) {
-        searchBtn.addEventListener('click', () => {
-            // Filter Data
-            const filteredData = filterData(currentTopic, currentPeriod);
-            renderTable(filteredData);
+    // Search Function
+    function performSearch() {
+        // Filter Data
+        const filteredData = filterData(currentTopic, currentPeriod);
+        renderTable(filteredData);
 
-            // Show Content
-            overlay.style.opacity = '0';
-            setTimeout(() => {
-                overlay.style.display = 'none';
-                content.style.display = 'block';
-                backBtn.style.display = 'block'; // Show back button
-            }, 300);
-        });
+        // Show Content
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            content.style.display = 'block';
+            backBtn.style.display = 'block'; // Show back button
+        }, 300);
     }
 
     // Create 'Back to Search' button dynamically
     const backBtn = document.createElement('button');
     backBtn.id = 'back-btn';
-    backBtn.textContent = '처음으로';
-    backBtn.style.cssText = 'display: none; margin: 0 auto 20px; padding: 10px 20px; font-size: 16px; background: #666; color: white; border: none; border-radius: 5px; cursor: pointer;';
+    backBtn.textContent = '초기화면';
+    // Style for Top-Right positioning
+    backBtn.style.cssText = 'display: none; position: absolute; top: 20px; right: 20px; padding: 8px 16px; font-size: 14px; background: #666; color: white; border: none; border-radius: 5px; cursor: pointer; z-index: 1000;';
+
+    // Add hover effect
+    backBtn.addEventListener('mouseover', () => backBtn.style.background = '#555');
+    backBtn.addEventListener('mouseout', () => backBtn.style.background = '#666');
+
     backBtn.addEventListener('click', () => {
         // Reset UI
         content.style.display = 'none';
@@ -61,13 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 10);
     });
 
-    // Insert back button before table
-    const tableContainer = document.querySelector('.table-container');
-    if (tableContainer) {
-        content.insertBefore(backBtn, tableContainer);
-    } else {
-        content.insertBefore(backBtn, content.firstChild);
-    }
+    // Insert back button into body (absolute positioning works best relative to viewport or body)
+    document.body.appendChild(backBtn);
 
     // Helper: Parse date string "YYYY-MM-DD" or "2024-02-01 ..."
     function parseDate(dateStr) {
