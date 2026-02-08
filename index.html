@@ -95,7 +95,7 @@
         );
 
         // 필터 패널 컴포넌트
-        const FilterPanel = ({ category, setCategory, period, setPeriod }) => {
+        const FilterPanel = ({ category, setCategory, period, setPeriod, onSearch }) => {
             const categories = ['정치', '경제', '사회', '장년'];
             const periods = [
                 { value: 'today', label: '오늘' },
@@ -135,6 +135,12 @@
                             ))}
                         </div>
                     </div>
+
+                    <div className="search-section">
+                        <button className="search-btn" onClick={onSearch}>
+                            🔍 검색
+                        </button>
+                    </div>
                 </div>
             );
         };
@@ -143,15 +149,20 @@
         const App = () => {
             const [category, setCategory] = useState('정치');
             const [period, setPeriod] = useState('today');
+            const [searchTriggered, setSearchTriggered] = useState(false);
+
+            const handleSearch = () => {
+                setSearchTriggered(true);
+            };
 
             const filteredData = useMemo(() => {
-                if (!window.keywordData) return [];
+                if (!searchTriggered || !window.keywordData) return [];
 
                 return window.keywordData
                     .filter(item => item.카테고리 === category)
                     .filter(item => isWithinPeriod(item.업로드일, period))
                     .sort((a, b) => b.추천점수 - a.추천점수);
-            }, [category, period]);
+            }, [category, period, searchTriggered]);
 
             return (
                 <div className="app">
@@ -177,21 +188,31 @@
                             setCategory={setCategory}
                             period={period}
                             setPeriod={setPeriod}
+                            onSearch={handleSearch}
                         />
 
-                        <div className="news-grid">
-                            {filteredData.length > 0 ? (
-                                filteredData.map((item, index) => (
-                                    <NewsCard key={index} item={item} index={index} />
-                                ))
-                            ) : (
-                                <div className="empty-state">
-                                    <div className="empty-icon">📭</div>
-                                    <h3>해당 기간에 뉴스가 없습니다</h3>
-                                    <p>다른 기간을 선택해보세요</p>
-                                </div>
-                            )}
-                        </div>
+                        {searchTriggered && (
+                            <div className="news-grid">
+                                {filteredData.length > 0 ? (
+                                    filteredData.map((item, index) => (
+                                        <NewsCard key={index} item={item} index={index} />
+                                    ))
+                                ) : (
+                                    <div className="empty-state">
+                                        <div className="empty-icon">📭</div>
+                                        <h3>해당 기간에 뉴스가 없습니다</h3>
+                                        <p>다른 기간을 선택해보세요</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {!searchTriggered && (
+                            <div className="search-prompt">
+                                <div className="prompt-icon">🔍</div>
+                                <h3>주제와 기간을 선택한 후 검색 버튼을 눌러주세요</h3>
+                            </div>
+                        )}
                     </main>
 
                     <footer className="app-footer">
